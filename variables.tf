@@ -34,11 +34,6 @@ variable "virtual_hub_id" {
   description = "(Required) The ID of the Virtual Hub where this Point-to-Site VPN Gateway should exist. Changing this forces a new resource to be created."
 }
 
-variable "vpn_server_configuration_id" {
-  type        = string
-  description = "(Required) The ID of the VPN Server Configuration which this Point-to-Site VPN Gateway should use. Changing this forces a new resource to be created."
-}
-
 variable "dns_servers" {
   type        = list(string)
   default     = null
@@ -61,4 +56,47 @@ variable "tags" {
   type        = any
   default     = null
   description = "(Optional) A mapping of tags to assign to the Point-to-Site VPN Gateway."
+}
+
+variable "vpn_server_configuration" {
+  type = object({
+    name                     = string
+    vpn_authentication_types = string
+    ipsec_policy = optional(object({
+      dh_group               = string
+      ike_encryption         = string
+      ike_integrity          = string
+      ipsec_encryption       = string
+      ipsec_integrity        = string
+      pfs_group              = string
+      sa_lifetime_seconds    = number
+      sa_data_size_kilobytes = number
+    }))
+    vpn_protocols = optional(list(string))
+    azure_active_directory_authentication = optional(object({
+      audience = string
+      issuer   = string
+      tenant   = string
+    }))
+    client_root_certificate = optional(map(object({
+      public_cert_data = string
+    })))
+    client_revoked_certificate = optional(map(object({
+      thumbprint = string
+    })))
+    radius = optional(object({
+      server = map(object({
+        address = string
+        secret  = string
+        score   = number
+      }))
+      client_root_certificate = optional(map(object({
+        thumbprint = string
+      })))
+      server_root_certificate = optional(map(object({
+        public_cert_data = string
+      })))
+    }))
+  })
+  description = "(Required) A vpn_server_configuration block as defined below."
 }
