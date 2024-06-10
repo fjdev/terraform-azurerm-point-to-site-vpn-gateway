@@ -20,6 +20,7 @@ No requirements.
 | Name | Type |
 |------|------|
 | [azurerm_point_to_site_vpn_gateway.p2s_vpng](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/point_to_site_vpn_gateway) | resource |
+| [azurerm_vpn_server_configuration.vpnsc](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/vpn_server_configuration) | resource |
 
 ## Inputs
 
@@ -36,7 +37,7 @@ No requirements.
 | <a name="input_scale_unit"></a> [scale\_unit](#input\_scale\_unit) | (Required) The Scale Unit for this Point-to-Site VPN Gateway. | `number` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | (Optional) A mapping of tags to assign to the Point-to-Site VPN Gateway. | `any` | `null` | no |
 | <a name="input_virtual_hub_id"></a> [virtual\_hub\_id](#input\_virtual\_hub\_id) | (Required) The ID of the Virtual Hub where this Point-to-Site VPN Gateway should exist. Changing this forces a new resource to be created. | `string` | n/a | yes |
-| <a name="input_vpn_server_configuration_id"></a> [vpn\_server\_configuration\_id](#input\_vpn\_server\_configuration\_id) | (Required) The ID of the VPN Server Configuration which this Point-to-Site VPN Gateway should use. Changing this forces a new resource to be created. | `string` | n/a | yes |
+| <a name="input_vpn_server_configuration"></a> [vpn\_server\_configuration](#input\_vpn\_server\_configuration) | (Required) A vpn\_server\_configuration block as defined below. | <pre>object({<br>    name                     = string<br>    vpn_authentication_types = string<br>    ipsec_policy = optional(object({<br>      dh_group               = string<br>      ike_encryption         = string<br>      ike_integrity          = string<br>      ipsec_encryption       = string<br>      ipsec_integrity        = string<br>      pfs_group              = string<br>      sa_lifetime_seconds    = number<br>      sa_data_size_kilobytes = number<br>    }))<br>    vpn_protocols = optional(list(string))<br>    azure_active_directory_authentication = optional(object({<br>      audience = string<br>      issuer   = string<br>      tenant   = string<br>    }))<br>    client_root_certificate = optional(map(object({<br>      public_cert_data = string<br>    })))<br>    client_revoked_certificate = optional(map(object({<br>      thumbprint = string<br>    })))<br>    radius = optional(object({<br>      server = map(object({<br>        address = string<br>        secret  = string<br>        score   = number<br>      }))<br>      client_root_certificate = optional(map(object({<br>        thumbprint = string<br>      })))<br>      server_root_certificate = optional(map(object({<br>        public_cert_data = string<br>      })))<br>    }))<br>  })</pre> | n/a | yes |
 
 ## Outputs
 

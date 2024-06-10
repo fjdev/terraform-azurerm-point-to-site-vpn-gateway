@@ -34,8 +34,8 @@ resource "azurerm_point_to_site_vpn_gateway" "p2s_vpng" {
 
   scale_unit                          = var.scale_unit
   virtual_hub_id                      = var.virtual_hub_id
-  vpn_server_configuration_id         = var.vpn_server_configuration_id
+  vpn_server_configuration_id         = azurerm_vpn_server_configuration.vpnsc.id
   dns_servers                         = var.dns_servers
   routing_preference_internet_enabled = var.routing_preference_internet_enabled
-  tags                                = var.tags
+  tags                                = try(var.tags.point_to_site_vpn_gateway, null)
 }
