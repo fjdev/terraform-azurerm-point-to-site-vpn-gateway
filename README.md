@@ -26,7 +26,7 @@ No requirements.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_connection_configuration"></a> [connection\_configuration](#input\_connection\_configuration) | (Required) A connection\_configuration block as defined below. | `object({})` | n/a | yes |
+| <a name="input_connection_configuration"></a> [connection\_configuration](#input\_connection\_configuration) | (Required) A connection\_configuration block as defined below. | <pre>object({<br>    name = string<br>    vpn_client_address_pool = object({<br>      address_prefixes = list(string)<br>    })<br>    route = optional(object({<br>      associated_route_table_id = string<br>      inbound_route_map_id      = string<br>      outbound_route_map_id     = string<br>      propagated_route_table = optional(object({<br>        ids    = list(string)<br>        labels = optional(list(string))<br>      }))<br>    }))<br>    internet_security_enabled = optional(bool)<br>  })</pre> | n/a | yes |
 | <a name="input_deploy_resource_group"></a> [deploy\_resource\_group](#input\_deploy\_resource\_group) | (Optional) Specifies whether to deploy the resource group or not. Defaults to true. | `bool` | `true` | no |
 | <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers) | (Optional) A list of IP Addresses of DNS Servers for the Point-to-Site VPN Gateway. | `list(string)` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created. | `string` | n/a | yes |

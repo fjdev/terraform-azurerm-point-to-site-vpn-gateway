@@ -20,7 +20,22 @@ variable "location" {
 }
 
 variable "connection_configuration" {
-  type        = object({})
+  type = object({
+    name = string
+    vpn_client_address_pool = object({
+      address_prefixes = list(string)
+    })
+    route = optional(object({
+      associated_route_table_id = string
+      inbound_route_map_id      = string
+      outbound_route_map_id     = string
+      propagated_route_table = optional(object({
+        ids    = list(string)
+        labels = optional(list(string))
+      }))
+    }))
+    internet_security_enabled = optional(bool)
+  })
   description = "(Required) A connection_configuration block as defined below."
 }
 
