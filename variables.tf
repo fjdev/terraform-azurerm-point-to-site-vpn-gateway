@@ -14,7 +14,8 @@ variable "location" {
 }
 
 variable "connection_configurations" {
-  type = map(object({
+  type = object({
+    name = string
     vpn_client_address_pool = object({
       address_prefixes = list(string)
     })
@@ -28,8 +29,8 @@ variable "connection_configurations" {
       }))
     }))
     internet_security_enabled = optional(bool)
-  }))
-  description = "(Required) One or more connection_configuration blocks as defined above."
+  })
+  description = "(Required) A connection_configuration block as defined below."
 }
 
 variable "scale_unit" {
