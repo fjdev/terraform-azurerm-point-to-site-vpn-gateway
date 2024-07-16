@@ -13,7 +13,7 @@ variable "location" {
   description = "(Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created."
 }
 
-variable "connection_configurations" {
+variable "connection_configuration" {
   type = object({
     name = string
     vpn_client_address_pool = object({
