@@ -48,5 +48,5 @@ resource "azurerm_point_to_site_vpn_gateway" "p2svpng" {
   vpn_server_configuration_id         = var.vpn_server_configuration_id
   dns_servers                         = var.dns_servers
   routing_preference_internet_enabled = var.routing_preference_internet_enabled
-  tags                                = try(var.tags.point_to_site_vpn_gateway, null)
+  tags                                = var.deploy_resource_group ? try(var.tags.point_to_site_vpn_gateway, null) : var.tags
 }
