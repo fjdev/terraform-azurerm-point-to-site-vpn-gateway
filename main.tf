@@ -14,38 +14,33 @@ resource "azurerm_point_to_site_vpn_gateway" "p2svpng" {
   resource_group_name = var.deploy_resource_group ? azurerm_resource_group.rg[0].name : var.resource_group_name
   location            = var.location
 
-  dynamic "connection_configuration" {
-    for_each = var.connection_configurations != null ? var.connection_configurations : {}
+  connection_configuration {
+    name = var.connection_configuration.name
 
-    content {
+    vpn_client_address_pool {
+      address_prefixes = var.connection_configuration.vpn_client_address_pool.address_prefixes
+    }
 
-      name = each.key
+    dynamic "route" {
+      for_each = var.connection_configuration.route != null ? [var.connection_configuration.route] : []
 
-      vpn_client_address_pool {
-        address_prefixes = each.value.vpn_client_address_pool.address_prefixes
-      }
+      content {
+        associated_route_table_id = route.value.associated_route_table_id
+        inbound_route_map_id      = route.value.inbound_route_map_id
+        outbound_route_map_id     = route.value.outbound_route_map_id
 
-      dynamic "route" {
-        for_each = each.value.route != null ? [each.value.route] : []
+        dynamic "propagated_route_table" {
+          for_each = route.value.propagated_route_table != null ? [route.value.propagated_route_table] : []
 
-        content {
-          associated_route_table_id = route.value.associated_route_table_id
-          inbound_route_map_id      = route.value.inbound_route_map_id
-          outbound_route_map_id     = route.value.outbound_route_map_id
-
-          dynamic "propagated_route_table" {
-            for_each = route.value.propagated_route_table != null ? [route.value.propagated_route_table] : []
-
-            content {
-              ids    = propagated_route_table.value.ids
-              labels = propagated_route_table.value.labels
-            }
+          content {
+            ids    = propagated_route_table.value.ids
+            labels = propagated_route_table.value.labels
           }
         }
       }
-
-      internet_security_enabled = each.value.internet_security_enabled
     }
+
+    internet_security_enabled = var.connection_configuration.internet_security_enabled
   }
 
   scale_unit                          = var.scale_unit
