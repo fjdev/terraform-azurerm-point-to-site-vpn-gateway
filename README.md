@@ -27,7 +27,7 @@ No modules.
 | <a name="input_connection_configuration"></a> [connection\_configuration](#input\_connection\_configuration) | (Required) A connection\_configuration block as defined below. | <pre>object({<br>    name = string<br>    vpn_client_address_pool = object({<br>      address_prefixes = list(string)<br>    })<br>    route = optional(object({<br>      associated_route_table_id = string<br>      inbound_route_map_id      = optional(string)<br>      outbound_route_map_id     = optional(string)<br>      propagated_route_table = optional(object({<br>        ids    = list(string)<br>        labels = optional(list(string))<br>      }))<br>    }))<br>    internet_security_enabled = optional(bool)<br>  })</pre> | n/a | yes |
 | <a name="input_deploy_resource_group"></a> [deploy\_resource\_group](#input\_deploy\_resource\_group) | (Optional) Specifies whether to deploy the resource group or not. Defaults to true. | `bool` | `true` | no |
 | <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers) | (Optional) A list of IP Addresses of DNS Servers for the Point-to-Site VPN Gateway. | `list(string)` | `[]` | no |
-| <a name="input_location"></a> [location](#input\_location) | (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created. | `string` | n/a | yes |
+| <a name="input_location"></a> [location](#input\_location) | (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created. | `string` | `"westeurope"` | no |
 | <a name="input_managed_by"></a> [managed\_by](#input\_managed\_by) | (Optional) The ID of the resource or application that manages this Resource Group. | `string` | `null` | no |
 | <a name="input_name"></a> [name](#input\_name) | (Required) Specifies the name of the Point-to-Site VPN Gateway. Changing this forces a new resource to be created. | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | (Required) The name of the resource group in which to create the Point-to-Site VPN Gateway. Changing this forces a new resource to be created. | `string` | n/a | yes |
@@ -43,3 +43,70 @@ No modules.
 |------|-------------|
 | <a name="output_id"></a> [id](#output\_id) | The ID of the Point-to-Site VPN Gateway. |
 <!-- END_TF_DOCS -->
+
+## Usage
+
+```hcl
+data "azurerm_client_config" "current" {
+}
+
+data "azurerm_virtual_hub" "vhub" {
+  name                = "example-vhub"
+  resource_group_name = "example-rg"
+}
+
+data "azurerm_virtual_hub_route_table" "default" {
+  name                = "defaultRouteTable"
+  resource_group_name = "example-rg"
+  virtual_hub_name    = data.azurerm_virtual_hub.vhub.name
+}
+
+data "azurerm_virtual_hub_route_table" "none" {
+  name                = "noneRouteTable"
+  resource_group_name = "example-rg"
+  virtual_hub_name    = data.azurerm_virtual_hub.vhub.name
+}
+
+module "vpn_server_configuration" {
+  source = "github.com/fjdev/terraform-azurerm-vpn-server-configuration"
+
+  name                     = "example-vpnsc"
+  deploy_resource_group    = false
+  resource_group_name      = "example-rg"
+  vpn_authentication_types = ["AAD"]
+  vpn_protocols            = ["OpenVPN"]
+
+  azure_active_directory_authentication = {
+    audience = "41b23e61-6c1e-4545-b367-cd054e0ed4b4"
+    issuer   = "https://sts.windows.net/${data.azurerm_client_config.current.tenant_id}/"
+    tenant   = "https://login.microsoftonline.com/${data.azurerm_client_config.current.tenant_id}/"
+  }
+}
+
+module "point_to_site_vpn_gateway" {
+  source = "github.com/fjdev/terraform-azurerm-point-to-site-vpn-gateway"
+
+  name                  = "example-p2svpng"
+  deploy_resource_group = false
+  resource_group_name   = "example-rg"
+
+  connection_configuration = {
+    name = "P2SConnectionConfig-OpenVN-AAD"
+    vpn_client_address_pool = {
+      address_prefixes = ["10.99.112.0/21"]
+    }
+    route = {
+      associated_route_table_id = data.azurerm_virtual_hub_route_table.default.id
+      propagated_route_table = {
+        ids    = [data.azurerm_virtual_hub_route_table.none.id]
+        labels = ["none"]
+      }
+    }
+  }
+
+  scale_unit                  = 4
+  virtual_hub_id              = data.azurerm_virtual_hub.vhub.id
+  vpn_server_configuration_id = module.vpn_server_configuration.id
+  dns_servers                 = ["10.99.4.4"]
+}
+```
